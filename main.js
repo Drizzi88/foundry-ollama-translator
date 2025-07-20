@@ -1,14 +1,21 @@
 Hooks.once("ready", () => {
   console.log("ollama-translator | ready hook triggered");
 
-  Hooks.on("renderItemSheet", (app, html, data) => {
-    console.log("ollama-translator | Item sheet rendered for:", app.object.name);
+  Hooks.on("renderItemSheet", (app, html) => {
+    const item = app.object;
+    const type = item?.type;
 
-    // Find the sheet header button area
-    const headerActions = html.closest(".app").find(".window-header .header-button");
-    const existing = html.find(".ollama-translate");
+    // Only target specific item types
+    const supportedTypes = ["spell", "feat", "item", "skill"];
+    if (!supportedTypes.includes(type)) {
+      console.log(`ollama-translator | Skipping item of type "${type}"`);
+      return;
+    }
 
-    if (existing.length) return; // Don't add twice
+    console.log(`ollama-translator | Item sheet rendered for: ${item.name} (${type})`);
+
+    // Prevent duplicate buttons
+    if (html.closest(".app").find(".ollama-translate").length) return;
 
     const translateBtn = $(
       `<a class="ollama-translate" style="margin-left: 8px;" title="Übersetze mit Ollama">
@@ -16,14 +23,16 @@ Hooks.once("ready", () => {
       </a>`
     );
 
-    // Add it to the title bar (near the window title)
+    // Append to header after title
     html.closest(".app").find(".window-header .window-title").after(translateBtn);
 
     translateBtn.on("click", async () => {
-      const item = app.object;
-      const description = item.system.description?.value || item.system.details?.description || "";
+      const description = item.system?.description?.value ||
+                          item.system?.description ||
+                          item.system?.details?.description ||
+                          "";
 
-      if (!description) {
+      if (!description || typeof description !== "string") {
         ui.notifications.warn("Keine Beschreibung zum Übersetzen gefunden.");
         return;
       }
