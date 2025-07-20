@@ -1,30 +1,29 @@
 Hooks.once("ready", () => {
   console.log("ollama-translator | ready hook triggered");
 
-  ContextMenu.registerMenu("items", "ollama-translator", {
-    name: "Übersetzen (Ollama)",
-    icon: '<i class="fas fa-language"></i>',
-    callback: async (li) => {
-      const itemId = li.dataset.documentId;
-      const item = game.items.get(itemId);
-      console.log("ollama-translator | clicked item", itemId, item);
+  Hooks.on("getItemDirectoryEntryContext", (html, options) => {
+    console.log("ollama-translator | extending context menu");
 
-      if (item) {
-        await translateItemText(item);
-      } else {
-        ui.notifications.warn("Item konnte nicht gefunden werden.");
-        console.warn("ollama-translator | no item found for id", itemId);
+    options.push({
+      name: "Übersetzen (Ollama)",
+      icon: '<i class="fas fa-language"></i>',
+      condition: li => {
+        console.log("ollama-translator | context menu condition check", li);
+        return true;
+      },
+      callback: async li => {
+        const itemId = li.data("documentId");
+        const item = game.items.get(itemId);
+        console.log("ollama-translator | clicked item", itemId, item);
+
+        if (item) {
+          await translateItemText(item);
+        } else {
+          ui.notifications.warn("Item konnte nicht gefunden werden.");
+        }
       }
-    },
-    condition: li => {
-      console.log("ollama-translator | context menu condition check for li", li);
-      return true;
-    },
-    type: "context",
-    selector: ".directory-item"
+    });
   });
-
-  console.log("ollama-translator | context menu registered");
 });
 
 async function translateItemText(item) {
