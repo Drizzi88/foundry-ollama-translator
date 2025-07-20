@@ -10,10 +10,12 @@
   "url": "https://github.com/Drizzi88/foundry-ollama-translator",
   "manifest": "https://raw.githubusercontent.com/Drizzi88/foundry-ollama-translator/main/module.json",
   "download": "https://github.com/Drizzi88/foundry-ollama-translator/raw/main/foundry-ollama-translator.zip",
-  "dependencies": [
-    {
-      "name": "lib-wrapper",
-      "type": "module"
-    }
-  ]
+  "relationships": {
+    "requires": [
+      {
+        "id": "lib-wrapper",
+        "type": "module"
+      }
+    ]
+  }
 }
