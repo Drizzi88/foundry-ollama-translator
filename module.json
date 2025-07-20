@@ -9,7 +9,7 @@
   "compatibleCoreVersion": "13",
   "url": "https://github.com/Drizzi88/foundry-ollama-translator",
   "manifest": "https://raw.githubusercontent.com/Drizzi88/foundry-ollama-translator/main/module.json",
-  "download": "https://github.com/Drizzi88/foundry-ollama-translator/raw/main/foundry-ollama-translator.zip"
+  "download": "https://github.com/Drizzi88/foundry-ollama-translator/raw/main/foundry-ollama-translator.zip",
    "dependencies": [
     {
       "name": "lib-wrapper",
