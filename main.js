@@ -1,13 +1,13 @@
 Hooks.once("ready", () => {
   console.log("ollama-translator | ready hook triggered");
 
-  Hooks.on("renderItemSheet5e", async (app, html) => {
+  Hooks.on("renderItemSheet", async (app, html) => {
     const item = app?.object;
     if (!item) return;
 
-    // Only apply to relevant item types
-    const supportedTypes = ["spell", "feat", "weapon", "equipment", "consumable", "tool", "skill"];
-    if (!supportedTypes.includes(item?.type)) return;
+    // Restrict to these types
+    const supportedTypes = ["spell", "feat", "weapon", "equipment", "consumable", "tool"];
+    if (!supportedTypes.includes(item.type)) return;
 
     // Avoid duplicate buttons
     if (html.closest(".app").find(".ollama-translate-button").length > 0) return;
@@ -18,11 +18,16 @@ Hooks.once("ready", () => {
       </a>
     `);
 
-    // Add to the sheet titlebar
-    html.closest(".app").find(".window-title").after(button);
+    const titleElement = html.closest(".app").find(".window-title");
+    if (titleElement.length > 0) {
+      titleElement.after(button);
+    } else {
+      // Fallback: Add to sheet header
+      html.find(".sheet-header").append(button);
+    }
 
     button.on("click", async () => {
-      const description = item.system?.description?.value || item.system?.description || item.system?.details?.description || "";
+      const description = item.system?.description?.value ?? item.system?.description ?? "";
 
       if (!description || typeof description !== "string") {
         ui.notifications.warn("Keine Beschreibung zum Übersetzen gefunden.");
