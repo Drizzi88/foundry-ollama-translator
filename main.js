@@ -1,30 +1,29 @@
-class OllamaItemDirectory extends ItemDirectory {
-  static get defaultOptions() {
-    const options = super.defaultOptions;
-    return options;
+Hooks.once("ready", () => {
+  console.log("ollama-translator | Patching contextMenuOptions for ItemDirectory");
+
+  // Only patch once
+  if (!ItemDirectory.prototype._ollamaPatched) {
+    const original = ItemDirectory.prototype.contextMenuOptions;
+
+    ItemDirectory.prototype.contextMenuOptions = function () {
+      const options = original.call(this);
+
+      options.push({
+        name: "Übersetzen (Ollama)",
+        icon: '<i class="fas fa-language"></i>',
+        condition: li => true,
+        callback: async li => {
+          const itemId = li.dataset.documentId;
+          const item = game.items.get(itemId);
+          if (item) await translateItemText(item);
+        }
+      });
+
+      return options;
+    };
+
+    ItemDirectory.prototype._ollamaPatched = true;
   }
-
-  contextMenuOptions() {
-    const options = super.contextMenuOptions();
-
-    options.push({
-      name: "Übersetzen (Ollama)",
-      icon: '<i class="fas fa-language"></i>',
-      condition: li => true,
-      callback: async li => {
-        const itemId = li.dataset.documentId;
-        const item = game.items.get(itemId);
-        if (item) await translateItemText(item);
-      }
-    });
-
-    return options;
-  }
-}
-
-Hooks.once("init", () => {
-  console.log("ollama-translator | Replacing ItemDirectory with OllamaItemDirectory");
-  CONFIG.ui.sidebar.directories.items = OllamaItemDirectory;
 });
 
 async function translateItemText(item) {
