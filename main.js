@@ -1,19 +1,28 @@
-Hooks.on("ready", () => {
+Hooks.once("ready", () => {
   console.log("ollama-translator | ready hook triggered");
 
   Hooks.on("renderItemSheet", (app, html, data) => {
-    const translateButton = $(
-      `<a class="ollama-translate" style="margin-left: 6px;" title="Übersetze mit Ollama">
+    console.log("ollama-translator | Item sheet rendered for:", app.object.name);
+
+    // Find the sheet header button area
+    const headerActions = html.closest(".app").find(".window-header .header-button");
+    const existing = html.find(".ollama-translate");
+
+    if (existing.length) return; // Don't add twice
+
+    const translateBtn = $(
+      `<a class="ollama-translate" style="margin-left: 8px;" title="Übersetze mit Ollama">
         <i class="fas fa-language"></i> Übersetzen
       </a>`
     );
 
-    // Inject the button into the sheet header
-    html.closest(".app").find(".window-header .window-title").after(translateButton);
+    // Add it to the title bar (near the window title)
+    html.closest(".app").find(".window-header .window-title").after(translateBtn);
 
-    translateButton.on("click", async () => {
+    translateBtn.on("click", async () => {
       const item = app.object;
-      const description = item.system.description?.value || "";
+      const description = item.system.description?.value || item.system.details?.description || "";
+
       if (!description) {
         ui.notifications.warn("Keine Beschreibung zum Übersetzen gefunden.");
         return;
@@ -31,7 +40,11 @@ ${description}`;
         const response = await fetch("http://localhost:11434/api/generate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ model: "gemma:3b-q4", prompt, stream: false })
+          body: JSON.stringify({
+            model: "gemma:3b-q4",
+            prompt,
+            stream: false
+          })
         });
 
         const json = await response.json();
@@ -59,6 +72,6 @@ ${description}`;
       }
     });
 
-    console.log("ollama-translator | Translate button added to item sheet");
+    console.log("ollama-translator | Übersetzen button added.");
   });
 });
