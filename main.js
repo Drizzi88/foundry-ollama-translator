@@ -1,23 +1,30 @@
-Hooks.once("init", () => {
-  console.log("ollama-translator | Initializing for Foundry v13");
+class OllamaItemDirectory extends ItemDirectory {
+  static get defaultOptions() {
+    const options = super.defaultOptions;
+    return options;
+  }
 
-  // Patch ItemDirectory context menu entries
-  libWrapper.register("foundry-ollama-translator", "ItemDirectory.prototype._contextMenuOptions", function (wrapped, ...args) {
-    const options = wrapped(...args);
+  contextMenuOptions() {
+    const options = super.contextMenuOptions();
 
     options.push({
       name: "Übersetzen (Ollama)",
       icon: '<i class="fas fa-language"></i>',
       condition: li => true,
       callback: async li => {
-        const itemId = li.data("document-id");
+        const itemId = li.dataset.documentId;
         const item = game.items.get(itemId);
         if (item) await translateItemText(item);
       }
     });
 
     return options;
-  }, "WRAPPER");
+  }
+}
+
+Hooks.once("init", () => {
+  console.log("ollama-translator | Replacing ItemDirectory with OllamaItemDirectory");
+  CONFIG.ui.sidebar.directories.items = OllamaItemDirectory;
 });
 
 async function translateItemText(item) {
@@ -40,7 +47,7 @@ ${text}`;
     const translated = typeof json.response === "string" ? json.response.trim() : json.response.content.trim();
     const confirmed = await Dialog.confirm({
       title: "Übersetzung übernehmen?",
-      content: `<p>${translated.replace(/\n/g, "<br>")}</p>`,
+      content: `<p>${translated.replace(/\\n/g, "<br>")}</p>`,
       yes: () => true,
       no: () => false,
       defaultYes: true
