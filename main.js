@@ -1,44 +1,30 @@
 Hooks.once("ready", () => {
   console.log("ollama-translator | ready hook triggered");
 
-  if (!ItemDirectory.prototype._ollamaPatched) {
-    const original = ItemDirectory.prototype.contextMenuOptions;
-    console.log("ollama-translator | patching contextMenuOptions");
+  ContextMenu.registerMenu("items", "ollama-translator", {
+    name: "Übersetzen (Ollama)",
+    icon: '<i class="fas fa-language"></i>',
+    callback: async (li) => {
+      const itemId = li.dataset.documentId;
+      const item = game.items.get(itemId);
+      console.log("ollama-translator | clicked item", itemId, item);
 
-    ItemDirectory.prototype.contextMenuOptions = function () {
-      const options = original.call(this);
-      console.log("ollama-translator | menu options before patch:", options.length);
+      if (item) {
+        await translateItemText(item);
+      } else {
+        ui.notifications.warn("Item konnte nicht gefunden werden.");
+        console.warn("ollama-translator | no item found for id", itemId);
+      }
+    },
+    condition: li => {
+      console.log("ollama-translator | context menu condition check for li", li);
+      return true;
+    },
+    type: "context",
+    selector: ".directory-item"
+  });
 
-      options.push({
-        name: "Übersetzen (Ollama)",
-        icon: '<i class="fas fa-language"></i>',
-        condition: li => {
-          console.log("ollama-translator | context menu condition triggered for", li);
-          return true;
-        },
-        callback: async li => {
-          console.log("ollama-translator | Übersetzen clicked", li);
-          const itemId = li.dataset.documentId;
-          const item = game.items.get(itemId);
-          console.log("ollama-translator | found item:", itemId, item);
-
-          if (item) {
-            await translateItemText(item);
-          } else {
-            console.warn("ollama-translator | no item found for id", itemId);
-          }
-        }
-      });
-
-      console.log("ollama-translator | menu options after patch:", options.length);
-      return options;
-    };
-
-    ItemDirectory.prototype._ollamaPatched = true;
-    console.log("ollama-translator | patch complete");
-  } else {
-    console.log("ollama-translator | already patched");
-  }
+  console.log("ollama-translator | context menu registered");
 });
 
 async function translateItemText(item) {
