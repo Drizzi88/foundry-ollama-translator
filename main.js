@@ -1,17 +1,23 @@
-Hooks.once('init', () => {
-  console.log("ollama-translator | Initializing");
-});
+Hooks.once("init", () => {
+  console.log("ollama-translator | Initializing for Foundry v13");
 
-Hooks.on('getItemDirectoryEntryContext', (html, options) => {
-  options.push({
-    name: "Übersetzen (Ollama)",
-    icon: '<i class="fas fa-language"></i>',
-    condition: li => true,
-    callback: li => {
-      const item = game.items.get(li.data("documentId"));
-      translateItemText(item);
-    }
-  });
+  // Patch ItemDirectory context menu entries
+  libWrapper.register("foundry-ollama-translator", "ItemDirectory.prototype._contextMenuOptions", function (wrapped, ...args) {
+    const options = wrapped(...args);
+
+    options.push({
+      name: "Übersetzen (Ollama)",
+      icon: '<i class="fas fa-language"></i>',
+      condition: li => true,
+      callback: async li => {
+        const itemId = li.data("document-id");
+        const item = game.items.get(itemId);
+        if (item) await translateItemText(item);
+      }
+    });
+
+    return options;
+  }, "WRAPPER");
 });
 
 async function translateItemText(item) {
