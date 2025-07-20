@@ -2,7 +2,7 @@
   "id": "foundry-ollama-translator",
   "title": "Ollama Translator",
   "description": "Translate spells, feats, skills, and notes using a local Ollama LLM",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "author": "Drizzi",
   "esmodules": ["main.js"],
   "minimumCoreVersion": "13",
@@ -10,12 +10,5 @@
   "url": "https://github.com/Drizzi88/foundry-ollama-translator",
   "manifest": "https://raw.githubusercontent.com/Drizzi88/foundry-ollama-translator/main/module.json",
   "download": "https://github.com/Drizzi88/foundry-ollama-translator/raw/main/foundry-ollama-translator.zip",
-  "relationships": {
-    "requires": [
-      {
-        "id": "lib-wrapper",
-        "type": "module"
-      }
-    ]
-  }
+  
 }
