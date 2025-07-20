@@ -1,23 +1,24 @@
 Hooks.once("ready", () => {
   console.log("ollama-translator | ready hook triggered");
 
-  Hooks.on("renderItemSheet5e", async (app, html, data) => {
-    const item = app.object;
+  Hooks.on("renderItemSheet5e", async (app, html) => {
+    const item = app?.object;
+    if (!item) return;
 
     // Only apply to relevant item types
     const supportedTypes = ["spell", "feat", "weapon", "equipment", "consumable", "tool", "skill"];
-    if (!supportedTypes.includes(item.type)) return;
+    if (!supportedTypes.includes(item?.type)) return;
 
-    // Prevent double buttons
-    if (html.find(".ollama-translate-button").length > 0) return;
+    // Avoid duplicate buttons
+    if (html.closest(".app").find(".ollama-translate-button").length > 0) return;
 
-    const button = $(
-      `<a class="ollama-translate-button" style="margin-left: 6px;" title="Mit Ollama übersetzen">
+    const button = $(`
+      <a class="ollama-translate-button" style="margin-left: 6px;" title="Mit Ollama übersetzen">
         <i class="fas fa-language"></i> Übersetzen
-      </a>`
-    );
+      </a>
+    `);
 
-    // Add to sheet header (next to title)
+    // Add to the sheet titlebar
     html.closest(".app").find(".window-title").after(button);
 
     button.on("click", async () => {
